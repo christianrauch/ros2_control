@@ -35,6 +35,7 @@
 #include "controller_manager_msgs/srv/list_hardware_components.hpp"
 #include "controller_manager_msgs/srv/list_hardware_interfaces.hpp"
 #include "controller_manager_msgs/srv/load_controller.hpp"
+#include "controller_manager_msgs/srv/load_controller_type.hpp"
 #include "controller_manager_msgs/srv/reload_controller_libraries.hpp"
 #include "controller_manager_msgs/srv/set_hardware_component_state.hpp"
 #include "controller_manager_msgs/srv/switch_controller.hpp"
@@ -304,6 +305,10 @@ protected:
   void load_controller_service_cb(
     const std::shared_ptr<controller_manager_msgs::srv::LoadController::Request> request,
     std::shared_ptr<controller_manager_msgs::srv::LoadController::Response> response);
+
+  void load_controller_type_service_cb(
+    const std::shared_ptr<controller_manager_msgs::srv::LoadControllerType::Request> request,
+    std::shared_ptr<controller_manager_msgs::srv::LoadControllerType::Response> response);
 
   void configure_controller_service_cb(
     const std::shared_ptr<controller_manager_msgs::srv::ConfigureController::Request> request,
@@ -680,6 +685,8 @@ private:
   rclcpp::Service<controller_manager_msgs::srv::ListControllerTypes>::SharedPtr
     list_controller_types_service_;
   rclcpp::Service<controller_manager_msgs::srv::LoadController>::SharedPtr load_controller_service_;
+  rclcpp::Service<controller_manager_msgs::srv::LoadControllerType>::SharedPtr
+    load_controller_type_service_;
   rclcpp::Service<controller_manager_msgs::srv::ConfigureController>::SharedPtr
     configure_controller_service_;
   rclcpp::Service<controller_manager_msgs::srv::ReloadControllerLibraries>::SharedPtr

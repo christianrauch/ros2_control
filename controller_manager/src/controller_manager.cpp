@@ -1178,6 +1178,10 @@ void ControllerManager::init_services()
   load_controller_service_ = create_service<controller_manager_msgs::srv::LoadController>(
     "~/load_controller", std::bind(&ControllerManager::load_controller_service_cb, this, _1, _2),
     qos_services, best_effort_callback_group_);
+  load_controller_type_service_ = create_service<controller_manager_msgs::srv::LoadControllerType>(
+    "~/load_controller_type",
+    std::bind(&ControllerManager::load_controller_type_service_cb, this, _1, _2), qos_services,
+    best_effort_callback_group_);
   configure_controller_service_ = create_service<controller_manager_msgs::srv::ConfigureController>(
     "~/configure_controller",
     std::bind(&ControllerManager::configure_controller_service_cb, this, _1, _2), qos_services,
@@ -2981,6 +2985,21 @@ void ControllerManager::load_controller_service_cb(
   RCLCPP_DEBUG(get_logger(), "loading service locked");
 
   response->ok = load_controller(request->name).get() != nullptr;
+
+  RCLCPP_DEBUG(
+    get_logger(), "loading service finished for controller '%s' ", request->name.c_str());
+}
+
+void ControllerManager::load_controller_type_service_cb(
+  const std::shared_ptr<controller_manager_msgs::srv::LoadControllerType::Request> request,
+  std::shared_ptr<controller_manager_msgs::srv::LoadControllerType::Response> response)
+{
+  // lock services
+  RCLCPP_DEBUG(get_logger(), "loading service called for controller '%s' ", request->name.c_str());
+  std::lock_guard<std::mutex> guard(services_lock_);
+  RCLCPP_DEBUG(get_logger(), "loading service locked");
+
+  response->ok = load_controller(request->name, request->type).get() != nullptr;
 
   RCLCPP_DEBUG(
     get_logger(), "loading service finished for controller '%s' ", request->name.c_str());
