@@ -1,0 +1,12 @@
+# The LoadController service allows you to load a single controller
+# inside controller_manager
+
+# Instantiate a controller class as "name" inside the controller manager.
+# The "type" must be one of the 'types' returned by 'ListControllerTypes'.
+# The return value "ok" indicates if the controller was successfully
+# constructed and initialized or not.
+
+string name
+string type
+---
+bool ok
