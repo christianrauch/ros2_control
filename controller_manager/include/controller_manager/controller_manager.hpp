@@ -597,6 +597,8 @@ private:
    */
   rclcpp::CallbackGroup::SharedPtr best_effort_callback_group_;
 
+  rclcpp::TimerBase::SharedPtr timer_loop_;
+
   /**
    * The RTControllerListWrapper class wraps a double-buffered list of controllers
    * to avoid needing to lock the real-time thread when switching controllers in

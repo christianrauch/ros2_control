@@ -43,10 +43,9 @@ int main(int argc, char ** argv)
   auto cm = std::make_shared<controller_manager::ControllerManager>(
     executor, manager_node_name, "", cm_node_options);
 
-  std::thread cm_thread([cm]() { cm->run_control_loop(); });
   executor->add_node(cm);
   executor->spin();
   rclcpp::shutdown();
-  cm_thread.join();
+
   return 0;
 }

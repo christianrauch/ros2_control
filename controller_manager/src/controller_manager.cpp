@@ -589,6 +589,7 @@ ControllerManager::ControllerManager(
     set_initial_hardware_components_state();
     init_services();
   }
+  run_control_loop();
 }
 
 ControllerManager::ControllerManager(
@@ -636,6 +637,7 @@ ControllerManager::ControllerManager(
       init_controller_manager();
     }
   }
+  run_control_loop();
 }
 
 ControllerManager::~ControllerManager()
@@ -864,33 +866,36 @@ void ControllerManager::run_control_loop()
   state.previous_time = get_trigger_clock()->now();
   std::this_thread::sleep_for(state.period);
   state.next_iteration_time = std::chrono::steady_clock::now();
-  while (rclcpp::ok())
-  {
-    const auto current_time = get_trigger_clock()->now();
-    const auto measured_period = current_time - state.previous_time;
-    state.previous_time = current_time;
-
-    read(get_trigger_clock()->now(), measured_period);
-    update(get_trigger_clock()->now(), measured_period);
-    write(get_trigger_clock()->now(), measured_period);
-    state.cycle_end_time = get_trigger_clock()->now();
-
-    if (timing_config.use_sim_time)
+  timer_loop_ = this->create_wall_timer(
+    state.period,
+    [this, &state, &timing_config, &controller_manager]()
     {
-      if (!sleep_for_sim_time(controller_manager, state))
+      const auto current_time = get_trigger_clock()->now();
+      const auto measured_period = current_time - state.previous_time;
+      state.previous_time = current_time;
+
+      read(get_trigger_clock()->now(), measured_period);
+      update(get_trigger_clock()->now(), measured_period);
+      write(get_trigger_clock()->now(), measured_period);
+      state.cycle_end_time = get_trigger_clock()->now();
+
+      if (timing_config.use_sim_time)
       {
-        break;
+        if (!sleep_for_sim_time(controller_manager, state))
+        {
+          // break;
+          return;
+        }
       }
-    }
-    else if (timing_config.expect_blocking_read_write)
-    {
-      sleep_for_blocking_read_write(controller_manager, timing_config, state);
-    }
-    else
-    {
-      sleep_for_periodic_cycle(controller_manager, timing_config, state);
-    }
-  }
+      else if (timing_config.expect_blocking_read_write)
+      {
+        sleep_for_blocking_read_write(controller_manager, timing_config, state);
+      }
+      else
+      {
+        sleep_for_periodic_cycle(controller_manager, timing_config, state);
+      }
+    });
 }
 
 void ControllerManager::init_robot_description_callback()
